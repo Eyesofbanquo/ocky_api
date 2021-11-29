@@ -1,0 +1,18 @@
+{
+  "name": "ocky_web",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "author": "Markim Shaw",
+  "license": "MIT",
+  "scripts": {
+    "start": "yarn build && node dist/index.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.13",
+    "express": "^4.17.1",
+    "pg": "^8.7.1",
+    "prettier": "^2.5.0",
+    "typescript": "^4.5.2"
+  }
+}
