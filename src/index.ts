@@ -29,6 +29,14 @@ app.get(
   }
 );
 
+app.get(
+  '/.well-known/apple-app-site-association',
+  (request: Request, response: Response) => {
+    const json = require('../apple-app-site-association.json');
+    response.send(json);
+  }
+);
+
 app.get('/test-quiz', async (request: Request, response: Response) => {
   const quizQuery = `select quiz_id as id, name, player from quizzes;`;
 
