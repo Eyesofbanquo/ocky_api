@@ -30,8 +30,6 @@ app.get(
 );
 
 app.get('/test-quiz', async (request: Request, response: Response) => {
-  const query = `select json_build_object( 'id', quiz.quiz_id, 'name', quiz.name, 'player', quiz.player, 'question', json_build_object( 'id', question.question_id, 'type', question.question_type, 'choices', json_build_object( 'id', answer.answer_id, 'is_correct', answer.is_correct, 'text', answer.text ) ) ) as quiz from quizzes quiz inner join questions question on question.fk_quiz_id = quiz.quiz_id inner join answers answer on answer.fk_question_id = question.question_id;`;
-
   const quizQuery = `select quiz_id as id, name, player from quizzes;`;
 
   const quizResults = await pool.query(quizQuery);
