@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "2W3P634BS8.com.donderapps.mlquizzo",
+        "paths": ["*"]
+      }
+    ]
+  },
+  "appclips": {
+    "apps": ["2W3P634BS8.com.donderapps.mlquizzo.Clip"]
+  }
+}

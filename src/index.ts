@@ -9,10 +9,10 @@ import pool, {
   createQuizTableIfNeeded,
 } from './db/pool';
 
-createUUIDExtension().catch();
-createAnswerTableIfNeeded().catch();
-createQuestionTableIfNeeded().catch();
-createQuizTableIfNeeded().catch();
+// createUUIDExtension().catch();
+// createAnswerTableIfNeeded().catch();
+// createQuestionTableIfNeeded().catch();
+// createQuizTableIfNeeded().catch();
 
 const app = Express();
 app.use(json());
@@ -37,11 +37,37 @@ app.get(
   }
 );
 
+/**
+ * Need to have a hash table like so
+ *
+ * quizResults[0] = uuid for kyrinne
+ * quizResults[1] = uuid for markim
+ *
+ * Basically you pass to the appclip just a regular number that is the index of the quiz/question
+ */
+
+const questionHash = [
+  { key: '0', value: '81309d24-4626-4288-95a3-f0b4892b46fc' },
+  { key: '123', value: '3e979c20-175d-419f-a4e5-cf0017659926' },
+];
+
 app.get('/test-quiz', async (request: Request, response: Response) => {
   const quizQuery = `select quiz_id as id, name, player from quizzes;`;
 
   const quizResults = await pool.query(quizQuery);
+
+  if (quizResults.rows.length == 0) {
+    response.send({
+      status: 200,
+      body: {
+        message: "There aren't any quizzes",
+      },
+    });
+    return;
+  }
+
   const quizFromResult = quizResults.rows[0];
+
   console.log(quizResults.rows[0]); /* retreives one quiz */
   const choicesQuery = `
   select json_build_object(
@@ -84,6 +110,64 @@ app.get('/test-quiz', async (request: Request, response: Response) => {
   };
 
   response.send(quiz);
+});
+
+/**
+ * This is the request used for app clips
+ */
+app.get('/q', async (request: Request, response: Response) => {
+  const hash_id = request.query.id;
+
+  const uuid = questionHash.find((f) => f.key === hash_id);
+
+  if (uuid === undefined) {
+    response.send({
+      status: 200,
+      error: {
+        message: 'No question exists',
+      },
+    });
+    return;
+  }
+
+  const choicesQuery = `
+  select json_build_object(
+    'quiz_question', json_build_object(
+      'name', question.name,
+      'id', question.question_id,
+      'type', question.question_type,
+      'choices', json_agg(json_build_object(
+        'id', answer.answer_id,
+        'is_correct', answer.is_correct,
+        'text', answer.text
+      ))
+    )
+  ) as question from questions question
+  inner join answers answer on answer.fk_question_id = question.question_id
+  where question_id = $1
+  group by question.name, question.question_id, question.question_type;`;
+
+  const result = await pool.query(choicesQuery, [uuid.value]);
+  const rows = result.rows;
+
+  if (rows.length < 1) {
+    response.send({
+      status: 200,
+      error: {
+        message: 'No question exists',
+      },
+    });
+    return;
+  }
+
+  const question = rows[0].question.quiz_question;
+
+  response.send({
+    status: 200,
+    body: {
+      question: question,
+    },
+  });
 });
 
 if (process.env.PORT) {
