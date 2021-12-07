@@ -2,17 +2,7 @@ require('dotenv').config();
 
 import Express, { json } from 'express';
 import { Request, Response } from 'express';
-import pool, {
-  createUUIDExtension,
-  createAnswerTableIfNeeded,
-  createQuestionTableIfNeeded,
-  createQuizTableIfNeeded,
-} from './db/pool';
-
-// createUUIDExtension().catch();
-// createAnswerTableIfNeeded().catch();
-// createQuestionTableIfNeeded().catch();
-// createQuizTableIfNeeded().catch();
+import pool from './db/pool';
 
 const app = Express();
 app.use(json());

@@ -4,15 +4,17 @@ import { v4 as uuidv4 } from 'uuid';
 let databaseConfig;
 
 if (process.env.DATABASE_URL) {
-  databaseConfig = { connectionString: process.env.DATABASE_URL };
+  databaseConfig = {
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  };
 }
 
 const pool = new Pool(databaseConfig);
 
 export default pool;
-
-/* Create default database */
-const databaseName = process.env.DATBASE_NAME ?? 'ocky_api';
 
 /* Add UUID extension */
 export const createUUIDExtension = async () => {
