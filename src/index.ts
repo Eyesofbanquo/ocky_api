@@ -14,7 +14,16 @@ const app = Express();
 app.use(json());
 
 app.get('/', (request: Request, response: Response) => {
-  response.send('hello, world');
+  response.send(`
+  <!DOCTYPE html>
+    <head>
+      <title>Ocky web</title>
+      <meta name="apple-itunes-app" content="app-id=1594025346">
+    </head>
+    <body>
+      <p>Hello, world</p>
+    </body>
+  </html>`);
 });
 
 app.get(
