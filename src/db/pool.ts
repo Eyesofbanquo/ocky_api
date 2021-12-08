@@ -6,9 +6,9 @@ let databaseConfig;
 if (process.env.DATABASE_URL) {
   databaseConfig = {
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false,
-    },
+    // ssl: {
+    //   rejectUnauthorized: false,
+    // },
   };
 }
 

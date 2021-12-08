@@ -2,7 +2,13 @@ require('dotenv').config();
 
 import Express, { json } from 'express';
 import { Request, Response } from 'express';
+import { retrieveQuestionUsingId } from './db/queries';
+import { questionHash } from './db/hash';
 import pool from './db/pool';
+import {
+  QuestionUrlFinderMiddleware,
+  QuestionQRCodeGenerator,
+} from './middleware';
 
 const app = Express();
 app.use(json());
@@ -35,12 +41,6 @@ app.get(
  *
  * Basically you pass to the appclip just a regular number that is the index of the quiz/question
  */
-
-const questionHash = [
-  { key: '0', value: '81309d24-4626-4288-95a3-f0b4892b46fc' },
-  { key: '123', value: '3e979c20-175d-419f-a4e5-cf0017659926' },
-  { key: '1', value: 'e5da6d04-2e42-44d5-a3b0-914a4cce2dec' },
-];
 
 app.get('/test-quiz', async (request: Request, response: Response) => {
   const quizQuery = `select quiz_id as id, name, player from quizzes;`;
@@ -121,24 +121,7 @@ app.get('/q', async (request: Request, response: Response) => {
     return;
   }
 
-  const choicesQuery = `
-  select json_build_object(
-    'quiz_question', json_build_object(
-      'name', question.name,
-      'id', question.question_id,
-      'type', question.question_type,
-      'choices', json_agg(json_build_object(
-        'id', answer.answer_id,
-        'is_correct', answer.is_correct,
-        'text', answer.text
-      ))
-    )
-  ) as question from questions question
-  inner join answers answer on answer.fk_question_id = question.question_id
-  where question_id = $1
-  group by question.name, question.question_id, question.question_type;`;
-
-  const result = await pool.query(choicesQuery, [uuid.value]);
+  const result = await pool.query(retrieveQuestionUsingId, [uuid.value]);
   const rows = result.rows;
 
   if (rows.length < 1) {
@@ -160,6 +143,33 @@ app.get('/q', async (request: Request, response: Response) => {
     },
   });
 });
+
+app.get(
+  '/q/code',
+  QuestionUrlFinderMiddleware,
+  async (request: Request, response: Response) => {
+    const url = request.body.question_url;
+
+    response.send({
+      status: 200,
+      body: {
+        question_url: url,
+        qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`,
+      },
+    });
+  }
+);
+
+app.get(
+  '/q/code/redirect',
+  QuestionUrlFinderMiddleware,
+  QuestionQRCodeGenerator,
+  async (request: Request, response: Response) => {
+    const url = request.body.qrcode;
+
+    response.redirect(url);
+  }
+);
 
 if (process.env.PORT) {
   app.listen(process.env.PORT, () => {
