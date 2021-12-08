@@ -18,7 +18,7 @@ app.get('/', (request: Request, response: Response) => {
   <!DOCTYPE html>
     <head>
       <title>Ocky web</title>
-      <meta name="apple-itunes-app" content="app-id=1594025346">
+      <meta name="apple-itunes-app" content="app-id=1594025346, app-clip-bundle-id=com.donderapps.mlquizzo.Clip, app-clip-display=card">
     </head>
     <body>
       <p>Hello, world</p>
