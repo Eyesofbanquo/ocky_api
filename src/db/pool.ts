@@ -6,15 +6,15 @@ import { v4 as uuidv4 } from 'uuid';
 let databaseConfig;
 
 if (process.env.DATABASE_URL) {
-  databaseConfig = {
-    connectionString: process.env.DATABASE_URL,
-  };
-
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV === 'development') {
     databaseConfig = {
-      ...databaseConfig,
+      connectionString: process.env.DATABASE_URL,
+    };
+  } else {
+    databaseConfig = {
+      connectionString: process.env.DATABASE_URL,
       ssl: {
-        rejectUnauthorized: true,
+        rejectUnauthorized: false,
       },
     };
   }
