@@ -9,7 +9,7 @@ import Question from '../model/question';
 type ICardViewProps = Question;
 export const CardView: React.FC<ICardViewProps> = (props) => {
   const [showQRCode, setShowQRCode] = useState<boolean>(false);
-  const apiQuestionUrl = `https://ocky-api.herokuapp.com/q?id=${props.id}`;
+  const apiQuestionUrl = `https://ocky-api.herokuapp.com/q?id=${props.hash_id}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${apiQuestionUrl}`;
   return (
     <Card sx={{ minWidth: 275, marginTop: 2 }}>

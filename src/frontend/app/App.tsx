@@ -24,6 +24,7 @@ const App: React.FC = (props) => {
         <CardView
           key={question.id}
           id={question.id}
+          hash_id={question.hash_id}
           name={question.name}
           player={question.player}
           type={question.type}

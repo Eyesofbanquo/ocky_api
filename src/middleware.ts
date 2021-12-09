@@ -12,6 +12,14 @@ export const RetrieveAllQuestions = async (
   const rows = result.rows;
 
   const questions = rows.map((row) => row.question.quiz_question);
+  const availableKeys = questionHash.map((hash) => hash.key);
+
+  questions.forEach((question) => {
+    const foundHash = questionHash.find(
+      (hash) => hash.value === question.id
+    ).key;
+    question.hash_id = foundHash;
+  });
 
   request.body.questions = questions;
   next();
