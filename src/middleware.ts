@@ -1,5 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 import { questionHash } from './db/hash';
+import { retrieveAllQuestions } from './db/queries';
+import pool from './db/pool';
+
+export const RetrieveAllQuestions = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  const result = await pool.query(retrieveAllQuestions);
+  const rows = result.rows;
+
+  const questions = rows.map((row) => row.question.quiz_question);
+
+  request.body.questions = questions;
+  next();
+};
 
 /**
  * Middleware that looks to just find the question from the hash and creates link

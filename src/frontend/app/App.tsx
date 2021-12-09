@@ -1,17 +1,41 @@
 import React, { FC, useEffect, useState } from 'react';
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Container,
+  Typography,
+} from '@mui/material';
 import axios from 'axios';
+import { CardView } from './components/CardView';
+import Question from './model/question';
 
 const App: React.FC = (props) => {
-  const [response, setResponse] = useState<string>('');
+  const [questions, setQuestions] = useState<Question[]>([]);
   useEffect(() => {
-    axios.get('/q?id=123').then((response) => {
-      console.log(response);
-    });
-  });
+    axios
+      .get('/api/retrieve-questions')
+      .then((response) => {
+        const networkResponseQuestions = response.data.body.questions;
+        console.log(networkResponseQuestions);
+        setQuestions(networkResponseQuestions);
+      })
+      .catch();
+  }, []);
   return (
-    <div>
-      <h1>Welcome to the Ocky React app</h1>
-    </div>
+    <Container maxWidth="sm">
+      <Typography variant="h1">Ocky App</Typography>
+      {questions.map((question) => (
+        <CardView
+          key={question.id}
+          id={question.id}
+          name={question.name}
+          player={question.player}
+          type={question.type}
+        />
+      ))}
+    </Container>
   );
 };
 

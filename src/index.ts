@@ -8,6 +8,7 @@ import pool from './db/pool';
 import {
   QuestionUrlFinderMiddleware,
   QuestionQRCodeGenerator,
+  RetrieveAllQuestions,
 } from './middleware';
 const path = require('path');
 
@@ -104,6 +105,21 @@ app.get('/test-quiz', async (request: Request, response: Response) => {
 
   response.send(quiz);
 });
+
+app.get(
+  '/api/retrieve-questions',
+  RetrieveAllQuestions,
+  async (request: Request, response: Response) => {
+    const questions = request.body.questions;
+
+    response.send({
+      status: 200,
+      body: {
+        questions: questions,
+      },
+    });
+  }
+);
 
 /**
  * This is the request used for app clips
