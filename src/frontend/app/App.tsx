@@ -1,12 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Container,
-  Typography,
-} from '@mui/material';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
 import axios from 'axios';
 import { CardView } from './components/CardView';
 import Question from './model/question';

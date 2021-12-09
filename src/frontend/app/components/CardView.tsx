@@ -1,16 +1,13 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  CardActions,
-  Button,
-} from '@mui/material';
-import { SxProps, Theme } from '@mui/system';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import CardActions from '@mui/material/CardActions';
+import Button from '@mui/material/Button';
 import React, { useState } from 'react';
 import Question from '../model/question';
 
 type ICardViewProps = Question;
-export const CardView: React.FC<ICardViewProps & SxProps<Theme>> = (props) => {
+export const CardView: React.FC<ICardViewProps> = (props) => {
   const [showQRCode, setShowQRCode] = useState<boolean>(false);
   const apiQuestionUrl = `https://ocky-api.herokuapp.com/q?id=${props.id}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${apiQuestionUrl}`;
