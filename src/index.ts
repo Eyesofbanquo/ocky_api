@@ -9,21 +9,14 @@ import {
   QuestionUrlFinderMiddleware,
   QuestionQRCodeGenerator,
 } from './middleware';
+const path = require('path');
 
 const app = Express();
 app.use(json());
+app.use(Express.static(path.join(__dirname, 'frontend/app')));
 
 app.get('/', (request: Request, response: Response) => {
-  response.send(`
-  <!DOCTYPE html>
-    <head>
-      <title>Ocky web</title>
-      <meta name="apple-itunes-app" content="app-id=1594025346, app-clip-bundle-id=com.donderapps.mlquizzo.Clip, app-clip-display=card">
-    </head>
-    <body>
-      <p>Hello, world</p>
-    </body>
-  </html>`);
+  response.sendFile(path.join(__dirname, './frontend/app/index.html'));
 });
 
 app.get(
