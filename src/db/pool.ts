@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -6,10 +8,16 @@ let databaseConfig;
 if (process.env.DATABASE_URL) {
   databaseConfig = {
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: process.env.NODE_ENV === 'DEVELOPMENT' ? true : false,
-    },
   };
+
+  if (process.env.NODE_ENV !== 'development') {
+    databaseConfig = {
+      ...databaseConfig,
+      ssl: {
+        rejectUnauthorized: true,
+      },
+    };
+  }
 }
 
 const pool = new Pool(databaseConfig);
