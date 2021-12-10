@@ -9,6 +9,7 @@ import {
   QuestionUrlFinderMiddleware,
   QuestionQRCodeGenerator,
   RetrieveAllQuestions,
+  RetrieveOckyQuestionHash,
 } from './middleware';
 const path = require('path');
 
@@ -120,43 +121,35 @@ app.get(
 /**
  * This is the request used for app clips
  */
-app.get('/q', async (request: Request, response: Response) => {
-  const hash_id = request.query.id;
+app.get(
+  '/q',
+  RetrieveOckyQuestionHash,
+  async (request: Request, response: Response) => {
+    const question_id = request.body.question_id;
 
-  const uuid = questionHash.find((f) => f.key === hash_id);
+    const result = await pool.query(retrieveQuestionUsingId, [question_id]);
+    const rows = result.rows;
 
-  if (uuid === undefined) {
+    if (rows.length < 1) {
+      response.send({
+        status: 200,
+        error: {
+          message: 'No question exists',
+        },
+      });
+      return;
+    }
+
+    const question = rows[0].question.quiz_question;
+
     response.send({
       status: 200,
-      error: {
-        message: 'No question exists',
+      body: {
+        question: question,
       },
     });
-    return;
   }
-
-  const result = await pool.query(retrieveQuestionUsingId, [uuid.value]);
-  const rows = result.rows;
-
-  if (rows.length < 1) {
-    response.send({
-      status: 200,
-      error: {
-        message: 'No question exists',
-      },
-    });
-    return;
-  }
-
-  const question = rows[0].question.quiz_question;
-
-  response.send({
-    status: 200,
-    body: {
-      question: question,
-    },
-  });
-});
+);
 
 app.get(
   '/q/code',

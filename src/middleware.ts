@@ -1,7 +1,35 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, request } from 'express';
 import { questionHash } from './db/hash';
-import { retrieveAllQuestions } from './db/queries';
+import {
+  retrieveAllQuestions,
+  retrieveSingleIdFromOckyQuestionHash,
+} from './db/queries';
 import pool from './db/pool';
+
+export const RetrieveOckyQuestionHash = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  const hash_id = request.query.id;
+  const result = await pool.query(retrieveSingleIdFromOckyQuestionHash, [
+    hash_id,
+  ]);
+  const rows = result.rows;
+
+  if (rows.length > 0) {
+    const question_id = rows[0].fk_question_id;
+    request.body.question_id = question_id;
+    next();
+  } else {
+    response.send({
+      status: 200,
+      error: {
+        message: 'Question does not exist/was not hashed.',
+      },
+    });
+  }
+};
 
 export const RetrieveAllQuestions = async (
   request: Request,
