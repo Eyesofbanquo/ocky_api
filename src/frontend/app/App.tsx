@@ -1,35 +1,17 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import axios from 'axios';
-import { CardView } from './components/CardView';
-import Question from './model/question';
+import { Routes, Route, Link } from 'react-router-dom';
+import QuestionList from './components/QuestionList';
 
-const App: React.FC = (props) => {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  useEffect(() => {
-    axios
-      .get('/api/retrieve-questions')
-      .then((response) => {
-        const networkResponseQuestions = response.data.body.questions;
-        console.log(networkResponseQuestions);
-        setQuestions(networkResponseQuestions);
-      })
-      .catch();
-  }, []);
+const App: FC = (props) => {
   return (
     <Container maxWidth="sm">
       <Typography variant="h1">Ocky App</Typography>
-      {questions.map((question) => (
-        <CardView
-          key={question.id}
-          id={question.id}
-          hash_id={question.hash_id}
-          name={question.name}
-          player={question.player}
-          type={question.type}
-        />
-      ))}
+      <Routes>
+        <Route path="/" element={<QuestionList />} />
+        <Route path="/questions" element={<QuestionList />}></Route>
+      </Routes>
     </Container>
   );
 };

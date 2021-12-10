@@ -16,10 +16,6 @@ const app = Express();
 app.use(json());
 app.use(Express.static(path.join(__dirname, 'frontend/app')));
 
-app.get('/', (request: Request, response: Response) => {
-  response.sendFile(path.join(__dirname, './frontend/app/index.html'));
-});
-
 app.get(
   '/apple-app-site-association',
   (request: Request, response: Response) => {
@@ -188,6 +184,10 @@ app.get(
     response.redirect(url);
   }
 );
+
+app.get('*', (request: Request, response: Response) => {
+  response.sendFile(path.join(__dirname, './frontend/app/index.html'));
+});
 
 if (process.env.PORT) {
   app.listen(process.env.PORT, () => {
