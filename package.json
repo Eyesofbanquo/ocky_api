@@ -7,6 +7,8 @@
   "scripts": {
     "start": "yarn build && yarn build-frontend-prod && node dist/index.js",
     "start-dev": "yarn build && yarn build-frontend-dev && node dist/index.js",
+    "start-docker": "docker-compose -f docker-compose.yml up --exit-code-from web",
+    "start-docker-dev": "docker-compose -f docker-compose.dev.yml up --exit-code-from web",
     "build": "tsc",
     "start-frontend": "webpack serve --port 3001",
     "build-frontend-prod": "NODE_ENV=production webpack",
