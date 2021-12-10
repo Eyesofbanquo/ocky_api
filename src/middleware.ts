@@ -3,6 +3,7 @@ import { questionHash } from './db/hash';
 import {
   retrieveAllQuestions,
   retrieveSingleIdFromOckyQuestionHash,
+  retrieveAllOckyQuestionHashIds,
 } from './db/queries';
 import pool from './db/pool';
 
@@ -59,15 +60,18 @@ export const RetrieveAllQuestions = async (
  * @param response
  * @param next
  */
-export const QuestionUrlFinderMiddleware = (
+export const QuestionUrlFinderMiddleware = async (
   request: Request,
   response: Response,
   next: NextFunction
 ) => {
   const hash_id = request.query.id;
-  const availableKeys = questionHash.map((hash) => hash.key);
 
-  if (availableKeys.find((key) => key == hash_id) != undefined) {
+  const result = await pool.query(retrieveAllOckyQuestionHashIds);
+  const rows = result.rows;
+  const containsHash = rows.find((row) => row.code_id.toString() === hash_id);
+
+  if (containsHash) {
     const url = `https://ocky-api.herokuapp.com/q?id=${hash_id}`;
     request.body.question_url = url;
     next();
