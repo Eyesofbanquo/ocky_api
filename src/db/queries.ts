@@ -28,3 +28,7 @@ export const retrieveAllQuestions = `select json_build_object(
 ) as question from questions question
 inner join answers answer on answer.fk_question_id = question.question_id
 group by question.name, question.question_id, question.question_type;`;
+
+export const retrieveAllOckyQuestionHashIds = `select * from ocky_question;`;
+
+export const retrieveSingleIdFromOckyQuestionHash = `select * from ocky_question where code_id = $1`;

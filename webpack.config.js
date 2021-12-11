@@ -26,6 +26,10 @@ module.exports = {
     ],
   },
   devtool: prod ? undefined : 'source-map',
+  devServer: {
+    static: '/dist',
+    hot: true,
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/frontend/index.html',

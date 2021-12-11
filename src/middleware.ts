@@ -1,7 +1,36 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, request } from 'express';
 import { questionHash } from './db/hash';
-import { retrieveAllQuestions } from './db/queries';
+import {
+  retrieveAllQuestions,
+  retrieveSingleIdFromOckyQuestionHash,
+  retrieveAllOckyQuestionHashIds,
+} from './db/queries';
 import pool from './db/pool';
+
+export const RetrieveOckyQuestionHash = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  const hash_id = request.query.id;
+  const result = await pool.query(retrieveSingleIdFromOckyQuestionHash, [
+    hash_id,
+  ]);
+  const rows = result.rows;
+
+  if (rows.length > 0) {
+    const question_id = rows[0].fk_question_id;
+    request.body.question_id = question_id;
+    next();
+  } else {
+    response.send({
+      status: 200,
+      error: {
+        message: 'Question does not exist/was not hashed.',
+      },
+    });
+  }
+};
 
 export const RetrieveAllQuestions = async (
   request: Request,
@@ -31,15 +60,18 @@ export const RetrieveAllQuestions = async (
  * @param response
  * @param next
  */
-export const QuestionUrlFinderMiddleware = (
+export const QuestionUrlFinderMiddleware = async (
   request: Request,
   response: Response,
   next: NextFunction
 ) => {
   const hash_id = request.query.id;
-  const availableKeys = questionHash.map((hash) => hash.key);
 
-  if (availableKeys.find((key) => key == hash_id) != undefined) {
+  const result = await pool.query(retrieveAllOckyQuestionHashIds);
+  const rows = result.rows;
+  const containsHash = rows.find((row) => row.code_id.toString() === hash_id);
+
+  if (containsHash) {
     const url = `https://ocky-api.herokuapp.com/q?id=${hash_id}`;
     request.body.question_url = url;
     next();

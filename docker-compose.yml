@@ -1,0 +1,20 @@
+version: "2"
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=mshaw
+      - POSTGRES_PASSWORD=20400112
+      - POSTGRES_DB=ocky_api
+    ports:
+      - "5432:5432"

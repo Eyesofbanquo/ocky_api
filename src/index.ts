@@ -9,16 +9,13 @@ import {
   QuestionUrlFinderMiddleware,
   QuestionQRCodeGenerator,
   RetrieveAllQuestions,
+  RetrieveOckyQuestionHash,
 } from './middleware';
 const path = require('path');
 
 const app = Express();
 app.use(json());
 app.use(Express.static(path.join(__dirname, 'frontend/app')));
-
-app.get('/', (request: Request, response: Response) => {
-  response.sendFile(path.join(__dirname, './frontend/app/index.html'));
-});
 
 app.get(
   '/apple-app-site-association',
@@ -124,43 +121,35 @@ app.get(
 /**
  * This is the request used for app clips
  */
-app.get('/q', async (request: Request, response: Response) => {
-  const hash_id = request.query.id;
+app.get(
+  '/q',
+  RetrieveOckyQuestionHash,
+  async (request: Request, response: Response) => {
+    const question_id = request.body.question_id;
 
-  const uuid = questionHash.find((f) => f.key === hash_id);
+    const result = await pool.query(retrieveQuestionUsingId, [question_id]);
+    const rows = result.rows;
 
-  if (uuid === undefined) {
+    if (rows.length < 1) {
+      response.send({
+        status: 200,
+        error: {
+          message: 'No question exists',
+        },
+      });
+      return;
+    }
+
+    const question = rows[0].question.quiz_question;
+
     response.send({
       status: 200,
-      error: {
-        message: 'No question exists',
+      body: {
+        question: question,
       },
     });
-    return;
   }
-
-  const result = await pool.query(retrieveQuestionUsingId, [uuid.value]);
-  const rows = result.rows;
-
-  if (rows.length < 1) {
-    response.send({
-      status: 200,
-      error: {
-        message: 'No question exists',
-      },
-    });
-    return;
-  }
-
-  const question = rows[0].question.quiz_question;
-
-  response.send({
-    status: 200,
-    body: {
-      question: question,
-    },
-  });
-});
+);
 
 app.get(
   '/q/code',
@@ -188,6 +177,53 @@ app.get(
     response.redirect(url);
   }
 );
+
+app.post('/q', async (request: Request, response: Response) => {
+  const question = request.body.question;
+
+  console.log(request.body);
+
+  const { questionType, id, player, name, choices } = request.body;
+
+  /* Add question */
+  await pool.query(
+    `
+  INSERT INTO questions (question_id, name, player, question_type) VALUES ($1, $2, $3, $4);`,
+    [id, name, 'Anonymous Creator', questionType]
+  );
+
+  /* Add each answer choice */
+  choices.forEach(async (choice) => {
+    await pool.query(
+      `INSERT INTO answers (answer_id, is_correct, text, fk_question_id) VALUES ($1, $2, $3, $4)`,
+      [choice.id, choice.isCorrect, choice.text, id]
+    );
+  });
+
+  /* Add to ocky table */
+  const results = await pool.query(
+    `INSERT INTO ocky_question (fk_question_id) VALUES ($1) RETURNING *`,
+    [id]
+  );
+  const rows = results.rows;
+
+  const url = `https://ocky-api.herokuapp.com/q?id=${rows[0].code_id}`;
+  const qr_code_url = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`;
+
+  console.log(qr_code_url);
+
+  response.statusCode = 201;
+  response.send({
+    status: 201,
+    body: {
+      qrcode: qr_code_url,
+    },
+  });
+});
+
+app.get('*', (request: Request, response: Response) => {
+  response.sendFile(path.join(__dirname, './frontend/app/index.html'));
+});
 
 if (process.env.PORT) {
   app.listen(process.env.PORT, () => {
